@@ -2,9 +2,11 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Modal, Button, Form } from 'react-bootstrap'
 import * as patientService from '../../services/patientService'
+import * as authService from '../../services/authService'
 import { toast } from 'react-toastify'
 
-const emptyForm = { nombre: '', apellido: '', rut: '', numeroContacto: '' }
+const emptyCreate = { nombre: '', apellido: '', rut: '', numeroContacto: '', email: '', password: '' }
+const emptyEdit = { nombre: '', apellido: '', rut: '', numeroContacto: '' }
 
 export default function PatientManagement() {
   const [patients, setPatients] = useState([])
@@ -12,7 +14,7 @@ export default function PatientManagement() {
   const [search, setSearch] = useState('')
   const [showModal, setShowModal] = useState(false)
   const [editing, setEditing] = useState(null)
-  const [form, setForm] = useState(emptyForm)
+  const [form, setForm] = useState(emptyCreate)
   const [loading, setLoading] = useState(false)
 
   const load = async () => {
@@ -33,7 +35,7 @@ export default function PatientManagement() {
     ))
   }, [search, patients])
 
-  const openCreate = () => { setEditing(null); setForm(emptyForm); setShowModal(true) }
+  const openCreate = () => { setEditing(null); setForm(emptyCreate); setShowModal(true) }
   const openEdit = (p) => {
     setEditing(p)
     setForm({ nombre: p.nombre, apellido: p.apellido, rut: p.rut, numeroContacto: p.numeroContacto })
@@ -46,10 +48,10 @@ export default function PatientManagement() {
     try {
       if (editing) {
         await patientService.update(editing.id, form)
-        toast.success('Paciente actualizado')
+        toast.success('Cliente actualizado')
       } else {
-        await patientService.create(form)
-        toast.success('Paciente creado')
+        await authService.register(form)
+        toast.success('Cliente creado con cuenta de acceso')
       }
       setShowModal(false)
       load()
@@ -59,10 +61,10 @@ export default function PatientManagement() {
   }
 
   const handleDelete = async (id) => {
-    if (!confirm('¿Eliminar paciente? Se eliminarán sus horas y fichas.')) return
+    if (!confirm('¿Eliminar cliente? Se eliminarán sus horas y fichas.')) return
     try {
       await patientService.remove(id)
-      toast.success('Paciente eliminado')
+      toast.success('Cliente eliminado')
       load()
     } catch { toast.error('Error al eliminar') }
   }
@@ -72,8 +74,8 @@ export default function PatientManagement() {
   return (
     <div>
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h4 className="fw-bold mb-0">Pacientes</h4>
-        <Button onClick={openCreate}>+ Nuevo Paciente</Button>
+        <h4 className="fw-bold mb-0">Clientes</h4>
+        <Button onClick={openCreate}>+ Nuevo Cliente</Button>
       </div>
 
       <div className="card p-3 mb-3">
@@ -108,7 +110,7 @@ export default function PatientManagement() {
                   <td>{p.email || '-'}</td>
                   <td>
                     <Link to={`/admin/patients/${p.id}`} className="btn btn-sm btn-outline-primary me-1">
-                      Ver ficha
+                      Ver información
                     </Link>
                     <button className="btn btn-sm btn-outline-secondary me-1" onClick={() => openEdit(p)}>
                       Editar
@@ -126,7 +128,7 @@ export default function PatientManagement() {
 
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
-          <Modal.Title>{editing ? 'Editar Paciente' : 'Nuevo Paciente'}</Modal.Title>
+          <Modal.Title>{editing ? 'Editar Cliente' : 'Nuevo Cliente'}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form onSubmit={handleSubmit} id="patientForm">
@@ -147,6 +149,28 @@ export default function PatientManagement() {
                 <Form.Label>Teléfono *</Form.Label>
                 <Form.Control required value={form.numeroContacto} onChange={set('numeroContacto')} />
               </div>
+              {!editing && (
+                <>
+                  <div className="col-12">
+                    <Form.Label>Email *</Form.Label>
+                    <Form.Control
+                      type="email" required
+                      value={form.email}
+                      onChange={set('email')}
+                      placeholder="correo@ejemplo.com"
+                    />
+                  </div>
+                  <div className="col-12">
+                    <Form.Label>Contraseña *</Form.Label>
+                    <Form.Control
+                      type="password" required minLength={6}
+                      value={form.password}
+                      onChange={set('password')}
+                      placeholder="Mínimo 6 caracteres"
+                    />
+                  </div>
+                </>
+              )}
             </div>
           </Form>
         </Modal.Body>

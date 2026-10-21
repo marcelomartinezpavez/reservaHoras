@@ -35,7 +35,7 @@ export default function ClientDashboard() {
 
   const fmt = (dt) => new Date(dt).toLocaleString('es-CL', { dateStyle: 'full', timeStyle: 'short' })
 
-  const upcoming = appointments.filter(a => a.status === 'RESERVED')
+  const upcoming = appointments.filter(a => !['USED', 'CANCELLED'].includes(a.status))
   const past = appointments.filter(a => ['USED', 'CANCELLED'].includes(a.status))
 
   if (loading) return <div className="d-flex justify-content-center mt-5"><div className="spinner-border" /></div>
@@ -46,16 +46,16 @@ export default function ClientDashboard() {
 
       {patient && (
         <div className="card p-3 mb-4" style={{ background: 'linear-gradient(135deg, #1a3a6c, #0d6efd)', color: 'white', borderRadius: 12 }}>
-          <div className="d-flex align-items-center gap-3">
-            <div className="rounded-circle bg-white text-primary d-flex align-items-center justify-content-center fw-bold"
+          <div className="d-flex align-items-center gap-3 flex-wrap">
+            <div className="rounded-circle bg-white text-primary d-flex align-items-center justify-content-center fw-bold flex-shrink-0"
               style={{ width: 56, height: 56, fontSize: 20 }}>
               {patient.nombre[0]}{patient.apellido[0]}
             </div>
-            <div>
+            <div className="flex-grow-1">
               <div className="fw-bold fs-5">{patient.nombre} {patient.apellido}</div>
-              <div className="opacity-75">RUT: {patient.rut} · {patient.numeroContacto}</div>
+              <div className="opacity-75" style={{ fontSize: '0.85rem' }}>RUT: {patient.rut} · {patient.numeroContacto}</div>
             </div>
-            <Link to="/client/book" className="btn btn-light ms-auto">
+            <Link to="/client/book" className="btn btn-light">
               📅 Reservar Hora
             </Link>
           </div>
@@ -87,13 +87,15 @@ export default function ClientDashboard() {
         <div className="card p-3 mb-3">
           <h6 className="fw-bold mb-3">Próximas Reservas</h6>
           {upcoming.map(a => (
-            <div key={a.id} className="d-flex align-items-center justify-content-between p-3 rounded mb-2"
+            <div key={a.id} className="d-flex align-items-start justify-content-between gap-2 p-3 rounded mb-2 flex-wrap"
               style={{ background: '#e8f0fe', borderLeft: '4px solid #0d6efd' }}>
               <div>
-                <div className="fw-semibold">{fmt(a.startTime)}</div>
+                {a.title && <div className="fw-bold mb-1" style={{ fontSize: '0.85rem' }}>{a.title}</div>}
+                <div className="fw-semibold" style={{ fontSize: '0.9rem' }}>{fmt(a.startTime)}</div>
+                {a.group && <div className="text-muted small">Grupal · {a.currentParticipants}/{a.maxParticipants} inscritos</div>}
                 {a.notes && <div className="text-muted small">{a.notes}</div>}
               </div>
-              <div className="d-flex align-items-center gap-2">
+              <div className="d-flex align-items-center gap-2 flex-shrink-0">
                 <StatusBadge status={a.status} />
                 <button className="btn btn-sm btn-outline-danger"
                   onClick={() => handleCancel(a.id)}>

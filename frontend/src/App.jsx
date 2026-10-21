@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { ToastContainer } from 'react-toastify'
 import { AuthProvider, useAuth } from './context/AuthContext'
@@ -13,9 +14,23 @@ import ClientDashboard from './pages/client/ClientDashboard'
 import BookingPage from './pages/client/BookingPage'
 
 function AppLayout({ children }) {
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+
   return (
     <div>
-      <Sidebar />
+      <div className="mobile-topbar">
+        <button className="hamburger-btn" onClick={() => setSidebarOpen(true)} aria-label="Abrir menú">
+          ☰
+        </button>
+        <span className="app-title">📅 AgendaApp</span>
+      </div>
+
+      <div
+        className={`sidebar-overlay${sidebarOpen ? ' sidebar-open' : ''}`}
+        onClick={() => setSidebarOpen(false)}
+      />
+
+      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       <main className="main-content">{children}</main>
     </div>
   )

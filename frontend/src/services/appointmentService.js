@@ -8,4 +8,6 @@ export const createSlot = (data) => api.post('/appointments/slot', data).then(r 
 export const book = (id, data) => api.post(`/appointments/${id}/book`, data).then(r => r.data)
 export const updateStatus = (id, status) => api.put(`/appointments/${id}/status`, { status }).then(r => r.data)
 export const cancel = (id) => api.put(`/appointments/${id}/cancel`).then(r => r.data)
+export const removeParticipant = (id, patientId) => api.delete(`/appointments/${id}/participants/${patientId}`).then(r => r.data)
+export const removeParticipantEntry = (id, participantId) => api.delete(`/appointments/${id}/participants/entry/${participantId}`).then(r => r.data)
 export const remove = (id) => api.delete(`/appointments/${id}`)

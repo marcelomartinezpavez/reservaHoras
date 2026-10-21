@@ -1,6 +1,7 @@
 const labels = {
   AVAILABLE: 'Disponible',
   RESERVED: 'Reservada',
+  FULL: 'Completo',
   USED: 'Atendida',
   CANCELLED: 'Cancelada'
 }

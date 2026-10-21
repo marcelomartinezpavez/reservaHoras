@@ -104,7 +104,7 @@ export default function PatientDetail() {
       <div className="row g-3 mb-4">
         <div className="col-md-4">
           <div className="card p-3">
-            <h6 className="fw-bold mb-3">Datos del Paciente</h6>
+            <h6 className="fw-bold mb-3">Datos del Cliente</h6>
             <div className="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center mb-3 mx-auto"
               style={{ width: 64, height: 64, fontSize: 24 }}>
               {patient.nombre[0]}{patient.apellido[0]}
@@ -133,7 +133,7 @@ export default function PatientDetail() {
                         <td>{new Date(a.startTime).toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' })}</td>
                         <td><StatusBadge status={a.status} /></td>
                         <td>
-                          {a.status === 'RESERVED' && (
+                          {['RESERVED', 'FULL'].includes(a.status) && (
                             <button className="btn btn-xs btn-sm btn-outline-secondary"
                               onClick={() => handleMarkUsed(a.id)}>
                               Marcar Atendida
@@ -189,7 +189,7 @@ export default function PatientDetail() {
                 <Form.Label>Hora asociada (opcional)</Form.Label>
                 <Form.Select value={recordForm.appointmentId} onChange={set('appointmentId')}>
                   <option value="">-- Sin hora asociada --</option>
-                  {appointments.filter(a => a.status === 'USED' || a.status === 'RESERVED').map(a => (
+                  {appointments.filter(a => ['USED', 'RESERVED', 'FULL'].includes(a.status)).map(a => (
                     <option key={a.id} value={a.id}>
                       {new Date(a.startTime).toLocaleString('es-CL')}
                     </option>

@@ -30,7 +30,7 @@ public class Patient {
     private User user;
 
     @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Appointment> appointments;
+    private List<AppointmentParticipant> participations;
 
     @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<AttentionRecord> attentionRecords;

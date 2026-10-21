@@ -20,13 +20,13 @@ export default function AdminDashboard() {
   const stats = {
     total: appointments.length,
     available: appointments.filter(a => a.status === 'AVAILABLE').length,
-    reserved: appointments.filter(a => a.status === 'RESERVED').length,
+    reserved: appointments.filter(a => a.status === 'FULL' || a.status === 'RESERVED').length,
     used: appointments.filter(a => a.status === 'USED').length,
     cancelled: appointments.filter(a => a.status === 'CANCELLED').length,
   }
 
   const pending = appointments
-    .filter(a => a.status === 'RESERVED')
+    .filter(a => a.status === 'FULL' || a.status === 'RESERVED')
     .sort((a, b) => new Date(a.startTime) - new Date(b.startTime))
     .slice(0, 8)
 
@@ -38,18 +38,23 @@ export default function AdminDashboard() {
 
       <div className="row g-3 mb-4">
         {[
-          { label: 'Total Horas', value: stats.total, color: 'primary', icon: '📅' },
-          { label: 'Disponibles', value: stats.available, color: 'success', icon: '✅' },
-          { label: 'Reservadas', value: stats.reserved, color: 'info', icon: '🔵' },
-          { label: 'Atendidas', value: stats.used, color: 'secondary', icon: '✔️' },
-          { label: 'Total Pacientes', value: patients.length, color: 'warning', icon: '👥' },
+          { label: 'Total Horas', value: stats.total, color: 'primary', icon: '📅', to: '/admin/calendar' },
+          { label: 'Disponibles', value: stats.available, color: 'success', icon: '✅', to: '/admin/calendar' },
+          { label: 'Reservadas', value: stats.reserved, color: 'info', icon: '🔵', to: '/admin/calendar' },
+          { label: 'Atendidas', value: stats.used, color: 'secondary', icon: '✔️', to: '/admin/calendar' },
+          { label: 'Total Clientes', value: patients.length, color: 'warning', icon: '👥', to: '/admin/patients' },
         ].map(s => (
           <div key={s.label} className="col-6 col-md-4 col-lg-2">
-            <div className={`card stat-card text-white bg-${s.color} p-3`}>
-              <div className="fs-4">{s.icon}</div>
-              <div className="fs-2 fw-bold">{s.value}</div>
-              <div className="small">{s.label}</div>
-            </div>
+            <Link to={s.to} className="text-decoration-none">
+              <div className={`card stat-card text-white bg-${s.color} p-3`}
+                style={{ cursor: 'pointer', transition: 'opacity 0.15s' }}
+                onMouseEnter={e => e.currentTarget.style.opacity = '0.85'}
+                onMouseLeave={e => e.currentTarget.style.opacity = '1'}>
+                <div className="fs-4">{s.icon}</div>
+                <div className="fs-2 fw-bold">{s.value}</div>
+                <div className="small">{s.label}</div>
+              </div>
+            </Link>
           </div>
         ))}
       </div>
@@ -68,7 +73,7 @@ export default function AdminDashboard() {
                 <table className="table table-sm table-hover mb-0">
                   <thead className="table-light">
                     <tr>
-                      <th>Paciente</th>
+                      <th>Cliente</th>
                       <th>Fecha</th>
                       <th>Hora</th>
                       <th>Estado</th>
@@ -93,7 +98,7 @@ export default function AdminDashboard() {
         <div className="col-12 col-lg-4">
           <div className="card p-3">
             <div className="d-flex justify-content-between align-items-center mb-3">
-              <h6 className="mb-0 fw-bold">Últimos Pacientes</h6>
+              <h6 className="mb-0 fw-bold">Últimos Clientes</h6>
               <Link to="/admin/patients" className="btn btn-sm btn-outline-primary">Ver todos</Link>
             </div>
             {patients.slice(0, 6).map(p => (

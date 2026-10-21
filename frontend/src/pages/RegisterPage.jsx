@@ -30,7 +30,7 @@ export default function RegisterPage() {
     <div className="login-wrapper d-flex align-items-center justify-content-center p-3">
       <div className="card login-card p-4" style={{ width: '100%', maxWidth: 480 }}>
         <div className="text-center mb-4">
-          <div style={{ fontSize: '2rem' }}>🦷</div>
+          <div style={{ fontSize: '2rem' }}>📅</div>
           <h4 className="fw-bold">Crear Cuenta</h4>
           <p className="text-muted mb-0">Regístrate para reservar horas</p>
         </div>

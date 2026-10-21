@@ -28,9 +28,9 @@ export default function LoginPage() {
     <div className="login-wrapper d-flex align-items-center justify-content-center p-3">
       <div className="card login-card p-4" style={{ width: '100%', maxWidth: 400 }}>
         <div className="text-center mb-4">
-          <div style={{ fontSize: '2.5rem' }}>🦷</div>
-          <h4 className="fw-bold">Clínica Dental</h4>
-          <p className="text-muted mb-0">Sistema de Reserva de Horas</p>
+          <div style={{ fontSize: '2.5rem' }}>📅</div>
+          <h4 className="fw-bold">AgendaApp</h4>
+          <p className="text-muted mb-0">Sistema de Reservas</p>
         </div>
         <form onSubmit={handleSubmit}>
           <div className="mb-3">

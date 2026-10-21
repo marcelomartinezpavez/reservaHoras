@@ -57,10 +57,13 @@ public class AppointmentController {
 
     @PostMapping("/slot")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<AppointmentDto> createSlot(@RequestBody Map<String, String> body) {
-        LocalDateTime start = LocalDateTime.parse(body.get("startTime"));
-        LocalDateTime end = LocalDateTime.parse(body.get("endTime"));
-        return ResponseEntity.ok(appointmentService.createSlot(start, end));
+    public ResponseEntity<AppointmentDto> createSlot(@RequestBody Map<String, Object> body) {
+        LocalDateTime start = LocalDateTime.parse(body.get("startTime").toString());
+        LocalDateTime end = LocalDateTime.parse(body.get("endTime").toString());
+        int maxParticipants = body.containsKey("maxParticipants")
+                ? Integer.parseInt(body.get("maxParticipants").toString()) : 1;
+        String title = body.containsKey("title") ? body.get("title").toString() : null;
+        return ResponseEntity.ok(appointmentService.createSlot(start, end, maxParticipants, title));
     }
 
     @PostMapping("/{id}/book")
@@ -69,6 +72,16 @@ public class AppointmentController {
             @PathVariable Long id,
             @RequestBody Map<String, Object> body,
             @AuthenticationPrincipal UserDetails userDetails) {
+        Object notesObj = body.get("notes");
+        String notes = notesObj != null ? notesObj.toString() : null;
+
+        // Invitado sin cuenta: verificar antes de intentar resolver paciente
+        if (body.containsKey("guestName")) {
+            String guestName = body.get("guestName").toString();
+            return ResponseEntity.ok(appointmentService.bookGuest(id, guestName, notes));
+        }
+
+        // Cliente registrado: por patientId explícito o por el usuario autenticado
         Long patientId;
         if (body.containsKey("patientId")) {
             patientId = Long.valueOf(body.get("patientId").toString());
@@ -77,7 +90,6 @@ public class AppointmentController {
             Patient patient = patientRepository.findByUserId(user.getId()).orElseThrow();
             patientId = patient.getId();
         }
-        String notes = body.containsKey("notes") ? body.get("notes").toString() : null;
         return ResponseEntity.ok(appointmentService.book(id, patientId, notes));
     }
 
@@ -92,8 +104,32 @@ public class AppointmentController {
 
     @PutMapping("/{id}/cancel")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<AppointmentDto> cancel(@PathVariable Long id) {
-        return ResponseEntity.ok(appointmentService.cancel(id));
+    public ResponseEntity<AppointmentDto> cancel(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow();
+        if (user.getRole() == Role.ADMIN) {
+            return ResponseEntity.ok(appointmentService.cancelSlot(id));
+        } else {
+            Patient patient = patientRepository.findByUserId(user.getId()).orElseThrow();
+            return ResponseEntity.ok(appointmentService.cancelParticipation(id, patient.getId()));
+        }
+    }
+
+    @DeleteMapping("/{id}/participants/entry/{participantId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<AppointmentDto> removeParticipantEntry(
+            @PathVariable Long id,
+            @PathVariable Long participantId) {
+        return ResponseEntity.ok(appointmentService.removeParticipantEntry(id, participantId));
+    }
+
+    @DeleteMapping("/{id}/participants/{patientId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<AppointmentDto> removeParticipant(
+            @PathVariable Long id,
+            @PathVariable Long patientId) {
+        return ResponseEntity.ok(appointmentService.cancelParticipation(id, patientId));
     }
 
     @DeleteMapping("/{id}")
